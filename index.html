@@ -84,7 +84,7 @@ body::before{
     position:relative;
     z-index:10;
     margin-top:40px;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0);
     padding: 25px;
     display: inline-block;
     border-radius: 15px;
@@ -130,7 +130,7 @@ button:hover{
     font-size: 2.2rem;
     margin-bottom: 5px;
     color: #ff4081;
-    text-shadow: 0 0 10px rgba(255, 64, 129, 0.5);
+    text-shadow: 0 0 10px rgba(2ff, 64, 129, 0.5);
 }
 
 #output h3 {
@@ -153,6 +153,7 @@ button:hover{
     <div id="output"></div>
 </div>
 
+<!-- 🎵 Space Background Music -->
 <audio id="music" loop>
 <source src="https://cdn.pixabay.com/audio/2023/03/27/audio_5c0f6c3a9a.mp3">
 </audio>
@@ -245,24 +246,28 @@ function playRealisticBirthdaySong() {
     let time = audioCtx.currentTime + 0.2;
 
     notes.forEach(note => {
+        // Core fundamental tone oscillator
         let oscElement = audioCtx.createOscillator();
         let mainGain = audioCtx.createGain();
         oscElement.type = 'sine'; 
         oscElement.frequency.setValueAtTime(note.f, time);
 
+        // Realistic Bell Overtone (chime strike)
         let overtoneOsc = audioCtx.createOscillator();
         let overtoneGain = audioCtx.createGain();
         overtoneOsc.type = 'sine';
-        overtoneOsc.frequency.setValueAtTime(note.f * 2, time); 
+        overtoneOsc.frequency.setValueAtTime(note.f * 2, time); // 1 Octave higher
 
+        // Audio Envelope Parameters (Instant strike attack, smooth long natural decay)
         mainGain.gain.setValueAtTime(0, time);
         mainGain.gain.linearRampToValueAtTime(0.25, time + 0.01); 
         mainGain.gain.exponentialRampToValueAtTime(0.001, time + note.d);
 
         overtoneGain.gain.setValueAtTime(0, time);
         overtoneGain.gain.linearRampToValueAtTime(0.12, time + 0.005); 
-        overtoneGain.gain.exponentialRampToValueAtTime(0.001, time + 0.15); 
+        overtoneGain.gain.exponentialRampToValueAtTime(0.001, time + 0.15); // Overtone fades quickly
 
+        // Signal Route routing
         oscElement.connect(mainGain);
         mainGain.connect(audioCtx.destination);
 
@@ -275,15 +280,13 @@ function playRealisticBirthdaySong() {
         oscElement.stop(time + note.d);
         overtoneOsc.stop(time + note.d);
         
-        time += note.d + 0.08; 
+        time += note.d + 0.08; // Delicate delay gap
     });
 }
 
 /* 🎁 Main Engine */
-function start(passedName, passedDob){
-    let name = passedName || document.getElementById("name").value || "Star Voyager";
-    let dobInput = passedDob || document.getElementById("dob").value;
-    
+function start(){
+    let dobInput = document.getElementById("dob").value;
     if(!dobInput) {
         alert("Please select your date of birth first!");
         return;
@@ -298,8 +301,10 @@ function start(passedName, passedDob){
     createStars();
     createOrbits();
 
+    const name=document.getElementById("name").value || "Star Voyager";
     const dob=new Date(dobInput);
     const today=new Date();
+
     const days=(today-dob)/(1000*60*60*24);
 
     const planets=[
@@ -316,6 +321,7 @@ function start(passedName, passedDob){
     let i=0;
 
     function showNextPlanet(){
+        // Check if journey through solar system is finished
         if(i >= planets.length) {
             let backgroundMusic = document.getElementById("music");
             let fadeInterval = setInterval(() => {
@@ -325,6 +331,7 @@ function start(passedName, passedDob){
                     clearInterval(fadeInterval);
                     backgroundMusic.pause();
                     
+                    // Final celebration slide setup synchronized perfectly with final speech
                     let introText = "Happy Birthday to you, " + name + "!";
                     speak(introText, () => {
                         document.getElementById("output").innerHTML=`
@@ -345,12 +352,14 @@ function start(passedName, passedDob){
             dynamicSpeechPhrase = `Welcome ${name}. On planet ${p.name}, you are ${age} years old.`;
         }
 
+        // Execute text updates simultaneously with the speech synthesis utterance start
         speak(dynamicSpeechPhrase, () => {
             document.getElementById("output").innerHTML = `
                 <h2>🪐 ${p.name}</h2>
                 <h3>You are <b>${age}</b> years old here</h3>
             `;
         }, () => {
+            // Once speaking finishes, wait briefly and queue next planet
             i++;
             setTimeout(showNextPlanet, 800);
         });
@@ -358,26 +367,6 @@ function start(passedName, passedDob){
 
     showNextPlanet();
 }
-
-/* 🔗 URL Parameter Checker */
-window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlName = urlParams.get('name');
-    const urlDob = urlParams.get('dob');
-
-    // If a date of birth is successfully captured from URL, trigger auto-start
-    if(urlDob) {
-        // Modern browsers block autoplay music until a user gesture happens.
-        // We present a custom "Launch" button for immediate aesthetic immersion.
-        document.getElementById("inputForm").innerHTML = `
-            <h2>🌌 Space Journey Ready for ${urlName || 'Star Voyager'}</h2>
-            <button id="launchBtn">🚀 Launch Journey</button>
-        `;
-        document.getElementById("launchBtn").addEventListener('click', () => {
-            start(urlName, urlDob);
-        });
-    }
-});
 
 </script>
 
