@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌌 Ultimate Space Birthday</title>
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    color:white;
+    text-align:center;
+    overflow:hidden;
+    background-color: #050510;
+}
+
+/* 🌌 Moving Galaxy Background */
+body::before{
+    content:"";
+    position:fixed;
+    top: 0;
+    left: 0;
+    width:200%;
+    height:200%;
+    background:url("https://images.unsplash.com/photo-1462331940025-496dfbfc7564") repeat;
+    background-size: cover;
+    animation:moveGalaxy 80s linear infinite;
+    z-index:-2;
+}
+
+@keyframes moveGalaxy{
+    from{transform:translate(0,0);}
+    to{transform:translate(-600px,-600px);}
+}
+
+/* 🌠 Shooting Stars */
+.star{
+    position:absolute;
+    width:2px;
+    height:2px;
+    background:white;
+    animation:shoot 3s linear infinite;
+}
+
+@keyframes shoot{
+    from{transform:translate(0,0);opacity:1;}
+    to{transform:translate(-800px,800px);opacity:0;}
+}
+
+/* ☀ Sun */
+.sun{
+    position:absolute;
+    width:40px;
+    height:40px;
+    background:radial-gradient(circle,yellow,orange);
+    border-radius:50%;
+    top:50%;
+    left:50%;
+    margin:-20px;
+    box-shadow:0 0 40px yellow;
+}
+
+/* 🪐 Orbit */
+.orbit{
+    position:absolute;
+    border:1px dashed rgba(255,255,255,0.2);
+    border-radius:50%;
+    animation:rotate linear infinite;
+}
+
+@keyframes rotate{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
+
+.planet{
+    position:absolute;
+    border-radius:50%;
+}
+
+/* UI Setup */
+.container{
+    position:relative;
+    z-index:10;
+    margin-top:40px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 25px;
+    display: inline-block;
+    border-radius: 15px;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.5s ease-out;
+}
+
+input, button{
+    padding:12px;
+    margin:8px;
+    border-radius:8px;
+    border:none;
+    outline: none;
+    font-size: 1rem;
+}
+
+input {
+    width: 220px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+button{
+    background:#ff4081;
+    color:white;
+    cursor:pointer;
+    font-weight: bold;
+    transition: 0.2s;
+    width: 244px;
+}
+
+button:hover{
+    background: #e91e63;
+    transform: scale(1.03);
+}
+
+#output{
+    margin-top: 10px;
+}
+
+#output h2 {
+    font-size: 2.2rem;
+    margin-bottom: 5px;
+    color: #ff4081;
+    text-shadow: 0 0 10px rgba(255, 64, 129, 0.5);
+}
+
+#output h3 {
+    font-size: 1.4rem;
+    font-weight: 300;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container" id="uiContainer">
+    <div id="inputForm">
+        <h2>🎂 Space Birthday Gift</h2>
+        <input id="name" placeholder="Enter Name"><br>
+        <input type="date" id="dob"><br>
+        <button onclick="start()">🎁 Start Journey</button>
+    </div>
+    <div id="output"></div>
+</div>
+
+<audio id="music" loop>
+<source src="https://cdn.pixabay.com/audio/2023/03/27/audio_5c0f6c3a9a.mp3">
+</audio>
+
+<script>
+
+/* 🌠 Shooting Stars */
+function createStars(){
+    for(let i=0;i<20;i++){
+        let star=document.createElement("div");
+        star.className="star";
+        star.style.top=Math.random()*window.innerHeight+"px";
+        star.style.left=Math.random()*window.innerWidth+"px";
+        star.style.animationDelay=Math.random()*5+"s";
+        document.body.appendChild(star);
+    }
+}
+
+/* ☀ Sun + 🪐 Orbits */
+function createOrbits(){
+    if(document.querySelector(".sun")) return;
+
+    let sun=document.createElement("div");
+    sun.className="sun";
+    document.body.appendChild(sun);
+
+    const planets=[
+        {name:"Mercury", size:5, orbit:50, speed:4, color:"#aaa"},
+        {name:"Venus", size:7, orbit:80, speed:7, color:"#f5c16c"},
+        {name:"Earth", size:8, orbit:110, speed:10, color:"#4fa3ff"},
+        {name:"Mars", size:7, orbit:140, speed:15, color:"#ff4f4f"},
+        {name:"Jupiter", size:14, orbit:190, speed:25, color:"#f4d03f"},
+        {name:"Saturn", size:12, orbit:240, speed:35, color:"#d2b48c"},
+        {name:"Uranus", size:10, orbit:290, speed:45, color:"#7fffd4"},
+        {name:"Neptune", size:10, orbit:340, speed:55, color:"#4fd0ff"}
+    ];
+
+    planets.forEach(p=>{
+        let orbit=document.createElement("div");
+        orbit.className="orbit";
+        orbit.style.width=p.orbit*2+"px";
+        orbit.style.height=p.orbit*2+"px";
+        orbit.style.top="50%";
+        orbit.style.left="50%";
+        orbit.style.marginLeft=-p.orbit+"px";
+        orbit.style.marginTop=-p.orbit+"px";
+        orbit.style.animationDuration=p.speed+"s";
+
+        let planet=document.createElement("div");
+        planet.className="planet";
+        planet.style.width=p.size+"px";
+        planet.style.height=p.size+"px";
+        planet.style.background=p.color;
+        planet.style.top="0";
+        planet.style.left="50%";
+
+        orbit.appendChild(planet);
+        document.body.appendChild(orbit);
+    });
+}
+
+/* 🎤 TTS Engine with Synchronized Audio-Visual Callback */
+function speak(text, onStartCallback, onEndCallback){
+    const msg=new SpeechSynthesisUtterance(text);
+    msg.rate=0.95;
+    msg.pitch=1.1;
+    msg.lang="en-IN";
+    
+    if(onStartCallback) {
+        msg.onstart = onStartCallback;
+    }
+    if(onEndCallback) {
+        msg.onend = onEndCallback;
+    }
+    speechSynthesis.speak(msg);
+}
+
+/* 🎵 Realistic Music Box Bell Synthesizer */
+function playRealisticBirthdaySong() {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Musical Notes structure: Frequency (Hz), Duration (Seconds)
+    const notes = [
+        {f: 261.63, d: 0.4}, {f: 261.63, d: 0.4}, {f: 293.66, d: 0.8}, {f: 261.63, d: 0.8}, {f: 349.23, d: 0.8}, {f: 329.63, d: 1.4},
+        {f: 261.63, d: 0.4}, {f: 261.63, d: 0.4}, {f: 293.66, d: 0.8}, {f: 261.63, d: 0.8}, {f: 392.00, d: 0.8}, {f: 349.23, d: 1.4},
+        {f: 261.63, d: 0.4}, {f: 261.63, d: 0.4}, {f: 523.25, d: 0.8}, {f: 440.00, d: 0.8}, {f: 349.23, d: 0.8}, {f: 329.63, d: 0.8}, {f: 293.66, d: 0.8},
+        {f: 466.16, d: 0.4}, {f: 466.16, d: 0.4}, {f: 440.00, d: 0.8}, {f: 349.23, d: 0.8}, {f: 392.00, d: 0.8}, {f: 349.23, d: 1.6}
+    ];
+
+    let time = audioCtx.currentTime + 0.2;
+
+    notes.forEach(note => {
+        let oscElement = audioCtx.createOscillator();
+        let mainGain = audioCtx.createGain();
+        oscElement.type = 'sine'; 
+        oscElement.frequency.setValueAtTime(note.f, time);
+
+        let overtoneOsc = audioCtx.createOscillator();
+        let overtoneGain = audioCtx.createGain();
+        overtoneOsc.type = 'sine';
+        overtoneOsc.frequency.setValueAtTime(note.f * 2, time); 
+
+        mainGain.gain.setValueAtTime(0, time);
+        mainGain.gain.linearRampToValueAtTime(0.25, time + 0.01); 
+        mainGain.gain.exponentialRampToValueAtTime(0.001, time + note.d);
+
+        overtoneGain.gain.setValueAtTime(0, time);
+        overtoneGain.gain.linearRampToValueAtTime(0.12, time + 0.005); 
+        overtoneGain.gain.exponentialRampToValueAtTime(0.001, time + 0.15); 
+
+        oscElement.connect(mainGain);
+        mainGain.connect(audioCtx.destination);
+
+        overtoneOsc.connect(overtoneGain);
+        overtoneGain.connect(audioCtx.destination);
+        
+        oscElement.start(time);
+        overtoneOsc.start(time);
+        
+        oscElement.stop(time + note.d);
+        overtoneOsc.stop(time + note.d);
+        
+        time += note.d + 0.08; 
+    });
+}
+
+/* 🎁 Main Engine */
+function start(passedName, passedDob){
+    let name = passedName || document.getElementById("name").value || "Star Voyager";
+    let dobInput = passedDob || document.getElementById("dob").value;
+    
+    if(!dobInput) {
+        alert("Please select your date of birth first!");
+        return;
+    }
+
+    // Hide input form controls permanently from the screen layout
+    document.getElementById("inputForm").style.display = "none";
+    
+    // Initialize background audio elements
+    document.getElementById("music").play().catch(()=>{});
+
+    createStars();
+    createOrbits();
+
+    const dob=new Date(dobInput);
+    const today=new Date();
+    const days=(today-dob)/(1000*60*60*24);
+
+    const planets=[
+        {name:"Mercury", d:88},
+        {name:"Venus", d:225},
+        {name:"Earth", d:365},
+        {name:"Mars", d:687},
+        {name:"Jupiter", d:4333},
+        {name:"Saturn", d:10759},
+        {name:"Uranus", d:30687},
+        {name:"Neptune", d:60190}
+    ];
+
+    let i=0;
+
+    function showNextPlanet(){
+        if(i >= planets.length) {
+            let backgroundMusic = document.getElementById("music");
+            let fadeInterval = setInterval(() => {
+                if (backgroundMusic.volume > 0.1) {
+                    backgroundMusic.volume -= 0.1;
+                } else {
+                    clearInterval(fadeInterval);
+                    backgroundMusic.pause();
+                    
+                    let introText = "Happy Birthday to you, " + name + "!";
+                    speak(introText, () => {
+                        document.getElementById("output").innerHTML=`
+                            <h2>🎂 Happy Birthday, ${name}! 🌌</h2>
+                            <h3>Best wishes from: Upasana, Shyama & Karthika</h3>
+                        `;
+                    }, playRealisticBirthdaySong);
+                }
+            }, 100);
+            return;
+        }
+
+        let p=planets[i];
+        let age=(days/p.d).toFixed(2);
+        let dynamicSpeechPhrase = `On planet ${p.name}, you are ${age} years old.`;
+
+        if (i === 0) {
+            dynamicSpeechPhrase = `Welcome ${name}. On planet ${p.name}, you are ${age} years old.`;
+        }
+
+        speak(dynamicSpeechPhrase, () => {
+            document.getElementById("output").innerHTML = `
+                <h2>🪐 ${p.name}</h2>
+                <h3>You are <b>${age}</b> years old here</h3>
+            `;
+        }, () => {
+            i++;
+            setTimeout(showNextPlanet, 800);
+        });
+    }
+
+    showNextPlanet();
+}
+
+/* 🔗 URL Parameter Checker */
+window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlName = urlParams.get('name');
+    const urlDob = urlParams.get('dob');
+
+    // If a date of birth is successfully captured from URL, trigger auto-start
+    if(urlDob) {
+        // Modern browsers block autoplay music until a user gesture happens.
+        // We present a custom "Launch" button for immediate aesthetic immersion.
+        document.getElementById("inputForm").innerHTML = `
+            <h2>🌌 Space Journey Ready for ${urlName || 'Star Voyager'}</h2>
+            <button id="launchBtn">🚀 Launch Journey</button>
+        `;
+        document.getElementById("launchBtn").addEventListener('click', () => {
+            start(urlName, urlDob);
+        });
+    }
+});
+
+</script>
+
+</body>
+</html>
